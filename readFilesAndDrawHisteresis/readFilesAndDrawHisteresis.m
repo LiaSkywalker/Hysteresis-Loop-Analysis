@@ -48,7 +48,8 @@ for m=1:5
     for k=1:length(OuterStruct(m).data)
         OuterStruct(m).data(k).p = plot(OuterStruct(m).data(k).ch1,OuterStruct(m).data(k).ch2,'markersize',12);
     end
-    legend([OuterStruct(m).data.p], [OuterStruct(m).data.Resistance], 'Location', 'Best')
+    p = plot([OuterStruct(m).data.ch1point], [OuterStruct(m).data.ch2point], 'k');
+    legend([OuterStruct(m).data.p, p], [OuterStruct(m).data.Resistance, "edge line"], 'Location', 'Best')
 end
 
 
