@@ -6,50 +6,53 @@ clc
 close all
 
 %% import data of measurements
-files=dir('*.csv');
 OuterStruct = struct;
 
 %% iterate over all the files, and import B,H that measured. add them to struct
 
 %%
-
-for k=1:length(files) %repeat for every file
-    k; %prints index of current iteration
-    [times, ch1, ch2] = importfile(files(k).name); %import data to tuple vector
-    files(k).name
-    Resistance =str2double(files(k).name(14:end-4));
-    Material =str2double(files(k).name(10));
-
-%     Rmlist = isnan(times); %get rid of NaN in data!
-% %     T(Rmlist) = [];
-% %     Y(Rmlist) = [];
-% %     Y=Y+abs(min(Y));
-% %     localmax=findpeaks(Y,'MinPeakProminence',0.1);
-%     ch1(Rmlist) = [];
-%     ch2(Rmlist) = [];
-%     ch1=smooth(smooth(ch1));
-%     ch2=smooth(smooth(ch2));
-
-    %update the outer struct with the new data
-    currentStruct = struct('ch1',ch1,...
-        'Times',times,'ch2',ch2,'fileName',files(k).name, 'Resistance',...
-    Resistance,'Material',Material);
-    OuterStruct(k).currentData = currentStruct;
-    
+for m=1:5
+    files=dir("material_" + m + "*.csv");
+    for k=1:length(files) %repeat for every file
+        [times, ch1, ch2] = importfile(files(k).name); %import data to tuple vector
+        Resistance = files(k).name(14:end-4)
+        Material =str2double(files(k).name(10));
+%         
+%             Rmlist = isnan(times); %get rid of NaN in data!
+%             T(Rmlist) = [];
+%             Y(Rmlist) = [];
+%             Y=Y+abs(min(Y));
+%             localmax=findpeaks(Y,'MinPeakProminence',0.1);
+%             ch1(Rmlist) = [];
+%             ch2(Rmlist) = [];
+%             ch1=smooth(smooth(ch1));
+%             ch2=smooth(smooth(ch2));
+%         
+%         update the outer struct with the new data
+        currentStruct = struct('ch1',ch1,...
+            'Times',times,'ch2',ch2,'fileName',files(k).name, 'Resistance',...
+            Resistance,'Material',Material);
+        OuterStruct(m,k).currentData = currentStruct;
+        
+    end
 end
 
 %% print graphs
+for k=1:5
+    figure(k);
+    title("Material "+int2str(k))
+    xlabel('H [T]')
+    ylabel('B [T]')
+end
 
 for k=1:length(files)
     
-    f= figure();
-    handles(k) = axes('Parent',f);
+    f= figure(OuterStruct(k).currentData.Material);
     set(gca,'fontsize',12)
-    hold all
-    plot(OuterStruct(k).currentData.ch1,OuterStruct(k).currentData.ch2,'markersize',12,'Parent',axes)
-    title(['given resistance ' num2str(OuterStruct(k).currentData.Resistance)])
-    xlabel('H [T]')
-    ylabel('B [T]')
+    hold on
+    plot(OuterStruct(k).currentData.ch1,OuterStruct(k).currentData.ch2,'markersize',12)
+    hold on
+    %     title(['given resistance ' num2str(OuterStruct(k).currentData.Resistance)])
 end
 
 %% defult import data functions
