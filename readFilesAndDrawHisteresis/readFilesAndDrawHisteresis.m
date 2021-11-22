@@ -43,8 +43,8 @@ for m=1:5
     set(gca,'fontsize',12);
     hold on;
     title("Material "+m);
-    xlabel("$ ~H \left[V\right] $", 'interpreter','latex');
-    ylabel("$ ~B \left[V\right] $", 'interpreter','latex');
+    xlabel("$ \propto H \left[V\right] $", 'interpreter','latex');
+    ylabel("$ \propto B \left[V\right] $", 'interpreter','latex');
     for k=1:length(OuterStruct(m).data)
         OuterStruct(m).data(k).p = plot(OuterStruct(m).data(k).ch1,OuterStruct(m).data(k).ch2,'markersize',12);
     end
