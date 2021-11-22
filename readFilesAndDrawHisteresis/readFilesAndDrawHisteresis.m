@@ -11,7 +11,6 @@ OuterStruct = struct;
 
 %% iterate over all the files, and import B,H that measured. add them to struct
 
-%%
 for m=1:5
     files=dir("material_" + m + "*.csv");
     clear currentStruct
@@ -27,16 +26,18 @@ for m=1:5
 %             localmax=findpeaks(Y,'MinPeakProminence',0.1);
 %             ch1(Rmlist) = [];
 %             ch2(Rmlist) = [];
-%             ch1=smooth(smooth(ch1));
-%             ch2=smooth(smooth(ch2));
-%         
-%         update the outer struct with the new data
-        currentStruct(k) = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',files(k).name, 'Resistance', Resistance,'Material',Material);
+            ch1=smooth(smooth(ch1));
+            ch2=smooth(smooth(ch2));
+            [~, maxIdx] = max(ch1);
+            
+%     update the outer struct with the new data
+        currentStruct(k) = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',files(k).name, 'Resistance', Resistance,'Material',Material, 'ch1point', ch1(maxIdx), 'ch2point', ch2(maxIdx));
     end
     OuterStruct(m).data = currentStruct;
 end
 
 %% print graphs
+
 for m=1:5
     figure(m);
     set(gca,'fontsize',12);
@@ -47,7 +48,7 @@ for m=1:5
     for k=1:length(OuterStruct(m).data)
         OuterStruct(m).data(k).p = plot(OuterStruct(m).data(k).ch1,OuterStruct(m).data(k).ch2,'markersize',12);
     end
-    legend([OuterStruct(m).data.p], [OuterStruct(m).data.Resistance])
+    legend([OuterStruct(m).data.p], [OuterStruct(m).data.Resistance], 'Location', 'Best')
 end
 
 
