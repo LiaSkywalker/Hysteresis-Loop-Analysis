@@ -4,18 +4,19 @@
 %% clear workspace
 clc
 close all
+clear all
 
 %% import data of measurements
 OuterStruct = struct;
 
 %% iterate over all the files, and import B,H that measured. add them to struct
 
-%%
 for m=1:5
     files=dir("material_" + m + "*.csv");
+    clear currentStruct
     for k=1:length(files) %repeat for every file
         [times, ch1, ch2] = importfile(files(k).name); %import data to tuple vector
-        Resistance = files(k).name(14:end-4)
+        Resistance = string(files(k).name(14:end-4));
         Material =str2double(files(k).name(10));
 %         
 %             Rmlist = isnan(times); %get rid of NaN in data!
@@ -25,35 +26,36 @@ for m=1:5
 %             localmax=findpeaks(Y,'MinPeakProminence',0.1);
 %             ch1(Rmlist) = [];
 %             ch2(Rmlist) = [];
-%             ch1=smooth(smooth(ch1));
-%             ch2=smooth(smooth(ch2));
-%         
-%         update the outer struct with the new data
-        currentStruct = struct('ch1',ch1,...
-            'Times',times,'ch2',ch2,'fileName',files(k).name, 'Resistance',...
-            Resistance,'Material',Material);
-        OuterStruct(m,k).currentData = currentStruct;
-        
+            ch1=smooth(smooth(ch1));
+            ch2=smooth(smooth(ch2));
+            [~, maxIdx] = max(ch1);
+            
+%     update the outer struct with the new data
+        currentStruct(k) = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',files(k).name, 'Resistance', Resistance,'Material',Material, 'ch1point', ch1(maxIdx), 'ch2point', ch2(maxIdx));
     end
+    OuterStruct(m).data = currentStruct;
 end
 
 %% print graphs
-for k=1:5
-    figure(k);
-    title("Material "+int2str(k))
-    xlabel('H [T]')
-    ylabel('B [T]')
+
+for m=1:5
+    figure(m);
+    set(gca,'fontsize',12);
+    hold on;
+    title("Material "+m);
+    xlabel("$ \propto H \left[V\right] $", 'interpreter','latex');
+    ylabel("$ \propto B \left[V\right] $", 'interpreter','latex');
+    for k=1:length(OuterStruct(m).data)
+        OuterStruct(m).data(k).p = plot(OuterStruct(m).data(k).ch1,OuterStruct(m).data(k).ch2,'markersize',12);
+    end
+    p = plot([OuterStruct(m).data.ch1point], [OuterStruct(m).data.ch2point], 'k');
+    legend([OuterStruct(m).data.p, p], [OuterStruct(m).data.Resistance, "edge line"], 'Location', 'Best')
 end
 
-for k=1:length(files)
-    
-    f= figure(OuterStruct(k).currentData.Material);
-    set(gca,'fontsize',12)
-    hold on
-    plot(OuterStruct(k).currentData.ch1,OuterStruct(k).currentData.ch2,'markersize',12)
-    hold on
-    %     title(['given resistance ' num2str(OuterStruct(k).currentData.Resistance)])
-end
+
+
+
+
 
 %% defult import data functions
 function [times, ch1, ch2] = importfile(filename, dataLines)
