@@ -4,7 +4,6 @@
 %% clear workspace
 clc
 close all
-clear all
 
 %% import data of measurements
 OuterStruct = struct;
