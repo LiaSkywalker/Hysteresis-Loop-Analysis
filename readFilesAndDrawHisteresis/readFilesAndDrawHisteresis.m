@@ -6,17 +6,74 @@ clc
 close all
 
 %% import data of measurements
-OuterStruct = struct;
 
 %% iterate over all the files, and import B,H that measured. add them to struct
+materials=getMaterials;
+printGraph(materials);
 
-for m=1:5
+%% print graphs
+function printGraph(materials)
+    for m=1:5
+        figure(m);
+        set(gca,'fontsize',12);
+        hold on;
+        title("Material "+m);
+        xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
+        ylabel("$ \left[V\right] \propto B $", 'interpreter','latex');
+        for k=1:length(materials(m).data)
+            materials(m).data(k).p = plot(materials(m).data(k).ch1,materials(m).data(k).ch2,'markersize',12);
+        end
+        p = plot(materials(m).lineH, materials(m).lineB, 'k');
+        legend([materials(m).data.p, p], [materials(m).data.resistance, "edge line"], 'Location', 'Best')
+        figure(10+m)
+        set(gca,'fontsize',12);
+        hold on;
+        title("Material "+m+" permeability ", 'interpreter','latex');
+        xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
+        ylabel("$ \propto \mu $", 'interpreter','latex');
+        plot(materials(m).lineH, materials(m).per)
+    end
+    
+% Print the relative permeability 
+%     for m1=1:4
+%         for m2=m1+1:5
+%             figure(100+10*m1+m2)
+%             set(gca,'fontsize',12);
+%             hold on;
+%             title(sprintf("Relative permeability $ \\frac{\\mu_{%d}}{\\mu_{%d}} $", m1, m2), 'interpreter', 'latex');
+%             xlabel("$ \left[V\right] \propto H $", 'interpreter', 'latex');
+%             ylabel(sprintf("$ \\frac{\\mu_{%d}}{\\mu_{%d}} $", m1, m2), 'interpreter','latex');
+%             plot([],materials(m1).per./materials(m2).per)
+%         end
+%     end
+end
+
+
+%%
+function materials=getMaterials()
+    for m=5:-1:1 %Backwards for prealocation. (otherwise matlab will realocate data each itaration.)
+        materials(m).data = getMaterialData(m);
+        materials(m).material = m;
+        materials(m).lineH = [materials(m).data.ch1point];
+        materials(m).lineB = [materials(m).data.ch2point];
+        materials(m).per = materials(m).lineH./materials(m).lineB;
+    end
+end
+
+
+%%
+function data=getMaterialData(m)
     files=dir("material_" + m + "*.csv");
-    clear currentStruct
-    for k=1:length(files) %repeat for every file
-        [times, ch1, ch2] = importfile(files(k).name); %import data to tuple vector
-        Resistance = string(files(k).name(14:end-4));
-        Material =str2double(files(k).name(10));
+    for k=length(files):-1:1 %repeat for every file
+        data(k) = getMeasurementData(files(k));
+    end
+end
+
+%%
+function measure=getMeasurementData(file)
+        [times, ch1, ch2] = importfile(file.name); %import data to tuple vector
+        resistanceString = string(file.name(14:end-4));
+        resistance = str2double(resistanceString(1:end-1));
 %         
 %             Rmlist = isnan(times); %get rid of NaN in data!
 %             T(Rmlist) = [];
@@ -25,35 +82,11 @@ for m=1:5
 %             localmax=findpeaks(Y,'MinPeakProminence',0.1);
 %             ch1(Rmlist) = [];
 %             ch2(Rmlist) = [];
-            ch1=smooth(smooth(ch1));
-            ch2=smooth(smooth(ch2));
-            [~, maxIdx] = max(ch1);
-            
-%     update the outer struct with the new data
-        currentStruct(k) = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',files(k).name, 'Resistance', Resistance,'Material',Material, 'ch1point', ch1(maxIdx), 'ch2point', ch2(maxIdx));
-    end
-    OuterStruct(m).data = currentStruct;
+        ch1=smooth(smooth(ch1));
+        ch2=smooth(smooth(ch2));
+        [~, maxIdx] = max(ch1);
+        measure = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',file.name, 'resistanceString', resistanceString, 'resistance', resistance, 'ch1point', ch1(maxIdx), 'ch2point', ch2(maxIdx));
 end
-
-%% print graphs
-
-for m=1:5
-    figure(m);
-    set(gca,'fontsize',12);
-    hold on;
-    title("Material "+m);
-    xlabel("$ \propto H \left[V\right] $", 'interpreter','latex');
-    ylabel("$ \propto B \left[V\right] $", 'interpreter','latex');
-    for k=1:length(OuterStruct(m).data)
-        OuterStruct(m).data(k).p = plot(OuterStruct(m).data(k).ch1,OuterStruct(m).data(k).ch2,'markersize',12);
-    end
-    p = plot([OuterStruct(m).data.ch1point], [OuterStruct(m).data.ch2point], 'k');
-    legend([OuterStruct(m).data.p, p], [OuterStruct(m).data.Resistance, "edge line"], 'Location', 'Best')
-end
-
-
-
-
 
 
 %% defult import data functions
