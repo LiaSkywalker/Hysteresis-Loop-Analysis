@@ -32,8 +32,9 @@ end
 function [data]= getImage(file)
     data.image = imread(file.folder+"/"+file.name);
     data.gray = rgb2gray(data.image);
-    data.histogram = histeq(double(data.gray)/255);
-    data.bolIm = data.histogram>0.5;
+    data.rescale = rescale(data.gray);
+    data.boolIm = data.rescale>0.4;
+    data.B = sum((2 * data.boolIm) - 1, 'all');
     data.fileName= file.name;
     data.idx = str2double(file.name(1:3));
     %change the sign of voltage

@@ -20,11 +20,12 @@ function printGraph(materials)
         title("Material "+m);
         xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
         ylabel("$ \left[V\right] \propto B $", 'interpreter','latex');
-        for k=1:length(materials(m).data)
-            materials(m).data(k).p = plot(materials(m).data(k).ch1,materials(m).data(k).ch2,'markersize',12);
+        clear p;
+        for k=length(materials(m).data):-1:1
+            p(k) = plot(materials(m).data(k).ch1,materials(m).data(k).ch2,'markersize',12);
         end
-        p = plot(materials(m).lineH, materials(m).lineB, 'k');
-        legend([materials(m).data.p, p], [materials(m).data.resistance, "edge line"], 'Location', 'Best')
+        p2 = plot(materials(m).lineH, materials(m).lineB, 'k');
+        legend([p, p2], ["$ "+[materials(m).data.resistance]+" k\Omega $", "edge line"], 'Location', 'Best', 'interpreter','latex')
         figure(10+m)
         set(gca,'fontsize',12);
         hold on;
@@ -73,7 +74,7 @@ end
 function measure=getMeasurementData(file)
         [times, ch1, ch2] = importfile(file.name); %import data to tuple vector
         resistanceString = string(file.name(14:end-4));
-        resistance = str2double(resistanceString(1:end-1));
+        resistance = str2double(file.name(14:end-5));
 %         
 %             Rmlist = isnan(times); %get rid of NaN in data!
 %             T(Rmlist) = [];
