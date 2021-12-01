@@ -7,6 +7,57 @@ close all
 
 %% import data of measurements
 images = readImages();
+plotHisteresis(images);
+
+%%
+function grad=imGrad(image)
+    dx=conv2([-1 0 1], [1], image.boolIm, 'same');
+    dy=conv2([1], [-1 0 1], image.boolIm,'same');
+    grad=sqrt(dx.^2+dy.^2);
+end
+
+%%
+function plotHisteresisAlt(images)
+    figure(1000);
+
+    initV = [images(1:21).volt];
+    decreaseV = [images(21:59).volt];
+    increaseV = [images(59:99).volt];
+
+    initB = [images(1:21).bright];
+    decreaseB = [images(21:59).bright];
+    increaseB = [images(59:99).bright];
+
+    plot(initV, initB, decreaseV, decreaseB, increaseV, increaseB);
+
+    title("Histeresis loop");
+    xlabel("applied voltage $ \left[V\right] \propto H $", 'interpreter', 'latex');
+    ylabel("average brightness in the braight domains $ \propto B $", 'interpreter', 'latex'); 
+    set(gca,'fontsize',20);
+    legend(["initial curve", "voltage decrease", "voltage increase"],  'Location', 'Best');
+end
+
+%%
+function plotHisteresis(images)
+    figure(1000);
+
+    initV = [images(1:21).volt];
+    decreaseV = [images(21:59).volt];
+    increaseV = [images(59:99).volt];
+
+    initBl = [images(1:21).boolSum];
+    decreaseBl = [images(21:59).boolSum];
+    increaseBl = [images(59:99).boolSum];
+
+    plot(initV, initBl, decreaseV, decreaseBl, increaseV, increaseBl);
+
+    title("Histeresis loop");
+    xlabel("applied voltage $ \left[V\right] \propto H $", 'interpreter', 'latex');
+    ylabel("$ ( \#bright - \#dark) \propto B $", 'interpreter', 'latex');
+    set(gca,'fontsize',20);
+    legend(["initial curve", "voltage decrease", "voltage increase"],  'Location', 'Best');
+end
+
 % analizeImages(images);
 
 %% iterate over all the files, and import B,H that measured. add them to struct
@@ -33,8 +84,32 @@ function [data]= getImage(file)
     data.image = imread(file.folder+"/"+file.name);
     data.gray = rgb2gray(data.image);
     data.rescale = rescale(data.gray);
+%     threshold = 1;
     data.boolIm = data.rescale>0.4;
-    data.B = sum((2 * data.boolIm) - 1, 'all');
+    bright = data.gray(data.boolIm);
+    dark = data.gray(~data.boolIm);
+    data.bright=mean(bright,'all');
+    data.dark=mean(dark,'all'); 
+    for k=1:5
+        brightStd = std(double(bright));
+        darkStd = std(double(dark));
+        m=(brightStd*data.bright+darkStd*data.dark)/(darkStd+brightStd);
+        data.boolIm = data.gray>m;
+        bright = data.gray(data.boolIm);
+        dark = data.gray(~data.boolIm);
+        data.bright=mean(brigh,'all');
+        data.dark=mean(dark,'all'); 
+    end
+%     tmp = 128;
+%     while (threshold-tmp)^2>1e-1
+% %     for k=1:8
+%         data.bright=mean(data.gray(data.boolIm), 'all');
+%         data.dark=mean(data.gray(~data.boolIm), 'all');
+%         tmp = threshold;
+%         threshold = mean([data.bright, data.dark], 'all');
+%         data.boolIm = data.gray>threshold;
+%     end
+    data.boolSum = mean((2 * data.boolIm) - 1, 'all');
     data.fileName= file.name;
     data.idx = str2double(file.name(1:3));
     %change the sign of voltage
