@@ -18,7 +18,7 @@ function printGraph(materials)
         figure(m);
         set(gca,'fontsize',12);
         hold on;
-        title("Material "+m);
+        title("Material "+materials(m).material, 'interpreter','latex');
         xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
         ylabel("$ \left[V\right] \propto B $", 'interpreter','latex');
         clear p;
@@ -33,7 +33,7 @@ function printGraph(materials)
         title("Material "+materials(m).material+" permeability ", 'interpreter','latex');
         xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
         ylabel("$ \propto \mu $", 'interpreter','latex');
-        plot(materials(m).lineH, materials(m).per, '.')
+        plot(materials(m).lineH(2:end), materials(m).per, '.-')
     end
     
 % Print the relative permeability 
@@ -57,7 +57,7 @@ function materials=getMaterials(m)
     materials.material = m;
     materials.lineH = [materials.data.ch1point];
     materials.lineB = [materials.data.ch2point];
-    materials.per = materials.lineH./materials.lineB;
+    materials.per = diff(materials.lineB)./diff(materials.lineH);
 end
 
 
@@ -82,8 +82,8 @@ function measure=getMeasurementData(file)
 %             localmax=findpeaks(Y,'MinPeakProminence',0.1);
 %             ch1(Rmlist) = [];
 %             ch2(Rmlist) = [];
-        ch1=smooth(smooth(ch1));
-        ch2=smooth(smooth(ch2));
+        %ch1=smooth(smooth(ch1));
+        %ch2=smooth(smooth(ch2));
         [~, maxIdx] = max(ch1);
         measure = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',file.name, 'resistanceString', resistanceString, 'resistance', resistance, 'ch1point', ch1(maxIdx), 'ch2point', ch2(maxIdx));
 end
