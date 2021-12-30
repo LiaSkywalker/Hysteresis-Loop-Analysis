@@ -18,9 +18,8 @@ function printGraph(materials)
         figure(m);
         set(gca,'fontsize',12);
         hold on;
-        title("Material "+materials(m).material, 'interpreter','latex');
-        xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
-        ylabel("$ \left[V\right] \propto B $", 'interpreter','latex');
+        xlabel("$ \propto H $", 'interpreter','latex');
+        ylabel("$ \propto B $", 'interpreter','latex');
         clear p;
         for k=length(materials(m).data):-1:1
             p(k) = plot(materials(m).data(k).ch1,materials(m).data(k).ch2,'markersize',12);
@@ -30,8 +29,7 @@ function printGraph(materials)
         figure(10+m)
         set(gca,'fontsize',12);
         hold on;
-        title("Material "+materials(m).material+" permeability ", 'interpreter','latex');
-        xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
+        xlabel("$ \propto H $", 'interpreter','latex');
         ylabel("$ \propto \mu $", 'interpreter','latex');
         plot(materials(m).lineH(2:end), materials(m).per, '.-')
     end
