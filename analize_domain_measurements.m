@@ -7,7 +7,8 @@ close all
 
 %% import data of measurements
 images = readImages();
-plotHisteresis(images);
+% plotHisteresis(images);
+myPlot(images, 21,59, 17, ".-")
 
 %%
 function grad=imGrad(image)
@@ -97,7 +98,7 @@ function [data]= getImage(file)
         data.boolIm = data.gray>m;
         bright = data.gray(data.boolIm);
         dark = data.gray(~data.boolIm);
-        data.bright=mean(brigh,'all');
+        data.bright=mean(bright,'all');
         data.dark=mean(dark,'all'); 
     end
 %     tmp = 128;

@@ -1,2 +1,4 @@
-
 domain measure/
+tmp*/
+*.asv
+*/*.asv
