@@ -13,27 +13,34 @@ resistance=getResistance();
 printGraph(resistance);
 
 %% print graphs
-function printGraph(materials)
+function printGraph(obj)
     for m=1:3
-        figure(m);
-        set(gca,'fontsize',12);
+        f = figure(obj(m).resistance);
+        set(f, "position", [(m-1)*565+40,100, 1100, 750]);
+        set(gca,'fontsize',18);
         hold on;
-        %title("Material "+m);
-        xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
-        ylabel("$ \left[V\right] \propto B $", 'interpreter','latex');
+%         title("$ Resistance\ "+obj(m).resistance+"\Omega $", 'interpreter','latex');
+        xlabel("$ \propto H $", 'interpreter','latex');
+        ylabel("$ \propto B $", 'interpreter','latex');
         clear p;
-        for k=length(materials(m).data):-1:1 
-            p(k) = plot(materials(m).data(k).ch1,materials(m).data(k).ch2,'markersize',12);
+        cmap = colormap(cool(length(obj(m).data)));
+        [~, lookup] = sort([obj(m).data.temp]);
+        for k=length(obj(m).data):-3:1
+            idx = lookup(k);
+            plot(smooth(obj(m).data(idx).ch1,15),smooth(obj(m).data(idx).ch2,15),"lineWidth", 2, 'color', cmap(k, :));
         end
+        colorbar('Ticks',[0,1],'TickLabels', "$ {" + [min([obj(m).data.temp]), max([obj(m).data.temp])]+"}^{\circ}C $","TickLabelInterpreter","latex");
 %         p2 = plot(materials(m).lineH, materials(m).lineB, 'k');
-%         legend([p, p2], ["$ "+[materials(m).data.resistance]+" k\Omega $", "edge line"], 'Location', 'Best', 'interpreter','latex')
-%         figure(10+m)
-%         set(gca,'fontsize',12);
-%         hold on;
+%         legend(p, "$ "+[obj(m).data.temp]+" k\Omega $", 'Location', 'Best', 'interpreter','latex')
+        f = figure(10*obj(m).resistance);
+        set(f, "position", [(m-1)*565+150,50, 1100, 750]);
+        set(gca,'fontsize',18);
+        hold on;
 %         title("Material "+m+" permeability ", 'interpreter','latex');
-%         xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
-%         ylabel("$ \propto \mu $", 'interpreter','latex');
-%         plot(materials(m).lineH, materials(m).per)
+        xlabel("$ Temp \left[{}^{\circ}C\right] $", 'interpreter','latex');
+        ylabel("$ \propto M $", 'interpreter','latex');
+        plot([obj(m).data.temp], [obj(m).data.m], ".");
+%         plot([obj(m).data.temp], [obj(m).data.area], ".");
     end
     
 end
@@ -42,12 +49,9 @@ end
 function resistance=getResistance()
     resistanceArray = [500,1500,8000];
     for m=3:-1:1 %Backwards for prealocation. (otherwise matlab will realocate data each itaration.)
-        
         resistance(m).data = getResistancelData(resistanceArray(m));
         resistance(m).resistance = resistanceArray(m);
-        resistance(m).lineH = [resistance(m).data.ch1point];
-        resistance(m).lineB = [resistance(m).data.ch2point];
-        resistance(m).per = resistance(m).lineH./resistance(m).lineB;
+%         resistance(m).M = [resistance(m).data.m];
     end
 end
 
@@ -64,9 +68,9 @@ end
 
 %%
 function measure=getMeasurementData(file)
-        [times, ch1, ch2] = importfile(file.folder+"/"+file.name); %import data to tuple vector
-        resistanceString = string(file.name(14:end-4));
-        resistance = str2double(file.name(14:end-5));
+    [times, ch1, ch2] = importfile(file.folder+"/"+file.name); %import data to tuple vector
+    [~,~,idxs] = regexp(file.name,"gadolinum_\d+_OH_([-+]?\d+(\.\d+)?)_C.csv");
+    temp = str2double(file.name(idxs{1}(1):idxs{1}(2)));
 %         
 %             Rmlist = isnan(times); %get rid of NaN in data!
 %             T(Rmlist) = [];
@@ -75,10 +79,14 @@ function measure=getMeasurementData(file)
 %             localmax=findpeaks(Y,'MinPeakProminence',0.1);
 %             ch1(Rmlist) = [];
 %             ch2(Rmlist) = [];
-        ch1=smooth(smooth(ch1));
-        ch2=smooth(smooth(ch2));
-        [~, maxIdx] = max(ch1);
-        measure = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',file.name, 'resistanceString', resistanceString, 'resistance', resistance, 'ch1point', ch1(maxIdx), 'ch2point', ch2(maxIdx));
+%     ch1=smooth(smooth(ch1));
+%     ch2=smooth(smooth(ch2));
+    % todo
+%    [~,idx] = mink(ch1.^2, max(1,round(length(ch1)/10)));
+    [~,idx] = mink(ch1.^2, 400);
+    m = abs(ch2(idx));
+    area = polyarea(ch1, ch2);
+    measure = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',file.name, 'temp', temp, 'm', mean(m), "dm", std(m), "area", area);
 end
 
 
