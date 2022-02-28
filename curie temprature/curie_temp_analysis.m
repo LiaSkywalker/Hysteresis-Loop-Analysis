@@ -17,7 +17,7 @@ function printGraph(obj)
     for m=1:3
         f = figure(obj(m).resistance);
         set(f, "position", [(m-1)*565+40,100, 1100, 750]);
-        set(gca,'fontsize',18);
+        set(gca,'fontsize',22);
         hold on;
 %         title("$ Resistance\ "+obj(m).resistance+"\Omega $", 'interpreter','latex');
         xlabel("$ \propto H $", 'interpreter','latex');
@@ -34,12 +34,12 @@ function printGraph(obj)
 %         legend(p, "$ "+[obj(m).data.temp]+" k\Omega $", 'Location', 'Best', 'interpreter','latex')
         f = figure(10*obj(m).resistance);
         set(f, "position", [(m-1)*565+150,50, 1100, 750]);
-        set(gca,'fontsize',18);
+        set(gca,'fontsize',22);
         hold on;
 %         title("Material "+m+" permeability ", 'interpreter','latex');
         xlabel("$ Temp \left[{}^{\circ}C\right] $", 'interpreter','latex');
         ylabel("$ \propto M $", 'interpreter','latex');
-        plot([obj(m).data.temp], [obj(m).data.m], ".");
+        plot([obj(m).data.temp], [obj(m).data.m], ".", 'markersize', 20);
 %         plot([obj(m).data.temp], [obj(m).data.area], ".");
     end
     

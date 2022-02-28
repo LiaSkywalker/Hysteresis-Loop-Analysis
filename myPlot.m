@@ -2,6 +2,7 @@ function myPlot(images, i1,i2, fsize, format)
 %MYPLOT Summary of this function goes here
 %   Detailed explanation goes here
     figure(1000);
+    set(gcf, "position", [40,100, 1100, 750]);
 
     initV = [images(1:i1).volt];
     decreaseV = [images(i1:i2).volt];
@@ -19,6 +20,7 @@ function myPlot(images, i1,i2, fsize, format)
     legend(["initial curve", "voltage decrease", "voltage increase"],  'Location', 'Best');
     
     figure(1001);
+    set(gcf, "position", [800,100, 1100, 750]);
 
     initBl = [images(1:i1).wall_length];
     decreaseBl = [images(i1:i2).wall_length];
@@ -26,7 +28,7 @@ function myPlot(images, i1,i2, fsize, format)
 
     plot(initV, initBl, format, decreaseV, decreaseBl, format, increaseV, increaseBl, format,  'LineWidth',2, 'markersize',20);
 
-    xlabel("$ v \propto H $", 'interpreter', 'latex');
+    xlabel("$ V \left[ volt \right] \propto H $", 'interpreter', 'latex');
     ylabel("$ \propto $ Domains Perimeter", 'interpreter', 'latex');
     set(gca,'fontsize',fsize);
     legend(["initial curve", "voltage decrease", "voltage increase"],  'Location', 'Best');

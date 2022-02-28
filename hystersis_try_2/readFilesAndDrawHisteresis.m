@@ -13,14 +13,15 @@ materials(2)=getMaterials(4);
 printGraph(materials(1));
 printGraph(materials(2));
 plotPer(materials(1));
+plotPer(materials(2));
 
 %% print graphs
 function printGraph(material)
         figure('position',[100,100,1100,750]);
         set(gca,'fontsize',18);
         hold on;
-        xlabel("$ \propto H $", 'interpreter','latex');
-        ylabel("$ \propto B $", 'interpreter','latex');
+        xlabel("$ V_H \left[ volt \right] \propto H $", 'interpreter','latex');
+        ylabel("$ V_B \left[ volt \right] \propto B $", 'interpreter','latex');
         clear p;
         for k=length(material.data):-1:1
             p(k) = plot(material.data(k).ch1, material.data(k).ch2, '.', 'markersize', 1+5/(1+material.data(k).resistance));
@@ -34,10 +35,10 @@ end
 
 function plotPer(material)
 		figure('position',[100,100,1100,750]);
-        plot(material.lineH, material.per, '.-');
+        plot(material.lineH, material.per, '.-', 'markersize', 20, 'linewidth', 1.5);
         set(gca,'fontsize',18);
-        xlabel("$ \propto H $", 'interpreter','latex');
-        ylabel("$ \propto \mu $", 'interpreter','latex');
+        xlabel("$ V_H \left[ volt \right] \propto H $", 'interpreter','latex');
+        ylabel(" $\frac{V_B}{V_H} \propto \mu $", 'interpreter','latex');
 end
 % Print the relative permeability 
 %     for m1=1:4
