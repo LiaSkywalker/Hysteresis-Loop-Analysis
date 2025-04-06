@@ -10,32 +10,36 @@ close all
 %% iterate over all the files, and import B,H that measured. add them to struct
 materials(1)=getMaterials(3);
 materials(2)=getMaterials(4);
-printGraph(materials);
+printGraph(materials(1));
+printGraph(materials(2));
+plotPer(materials(1));
+plotPer(materials(2));
 
 %% print graphs
-function printGraph(materials)
-    for m=1:2
-        figure(m);
-        set(gca,'fontsize',12);
+function printGraph(material)
+        figure('position',[100,100,1100,750]);
+        set(gca,'fontsize',18);
         hold on;
-        title("Material "+materials(m).material, 'interpreter','latex');
-        xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
-        ylabel("$ \left[V\right] \propto B $", 'interpreter','latex');
+        xlabel("$ V_H \left[ volt \right] \propto H $", 'interpreter','latex');
+        ylabel("$ V_B \left[ volt \right] \propto B $", 'interpreter','latex');
         clear p;
-        for k=length(materials(m).data):-1:1
-            p(k) = plot(materials(m).data(k).ch1,materials(m).data(k).ch2,'markersize',12);
+        for k=length(material.data):-1:1
+            p(k) = plot(material.data(k).ch1, material.data(k).ch2, '.', 'markersize', 1+5/(1+material.data(k).resistance));
         end
-        p2 = plot(materials(m).lineH, materials(m).lineB, 'k');
-        legend([p, p2], ["$ "+[materials(m).data.resistance]+" k\Omega $", "edge line"], 'Location', 'Best', 'interpreter','latex')
-        figure(10+m)
-        set(gca,'fontsize',12);
-        hold on;
-        title("Material "+materials(m).material+" permeability ", 'interpreter','latex');
-        xlabel("$ \left[V\right] \propto H $", 'interpreter','latex');
-        ylabel("$ \propto \mu $", 'interpreter','latex');
-        plot(materials(m).lineH(2:end), materials(m).per, '.-')
-    end
-    
+        p2 = plot(material.lineH, material.lineB, 'k', 'linewidth', 1.5);
+        [~,icons] = legend([p, p2], ["$ "+[material.data.resistance]+" k\Omega $", "initial curve"], 'Location', 'Best', 'interpreter','latex');
+        icons = findobj(icons,'Type','line');
+		icons = findobj(icons,'Marker','none','-xor');
+		set(icons,'MarkerSize',20);
+end
+
+function plotPer(material)
+		figure('position',[100,100,1100,750]);
+        plot(material.lineH, material.per, '.-', 'markersize', 20, 'linewidth', 1.5);
+        set(gca,'fontsize',18);
+        xlabel("$ V_H \left[ volt \right] \propto H $", 'interpreter','latex');
+        ylabel(" $\frac{V_B}{V_H} \propto \mu $", 'interpreter','latex');
+end
 % Print the relative permeability 
 %     for m1=1:4
 %         for m2=m1+1:5
@@ -48,7 +52,7 @@ function printGraph(materials)
 %             plot([],materials(m1).per./materials(m2).per)
 %         end
 %     end
-end
+
 
 
 %%
@@ -57,7 +61,7 @@ function materials=getMaterials(m)
     materials.material = m;
     materials.lineH = [materials.data.ch1point];
     materials.lineB = [materials.data.ch2point];
-    materials.per = diff(materials.lineB)./diff(materials.lineH);
+    materials.per = materials.lineB./materials.lineH;
 end
 
 
@@ -84,8 +88,8 @@ function measure=getMeasurementData(file)
 %             ch2(Rmlist) = [];
         %ch1=smooth(smooth(ch1));
         %ch2=smooth(smooth(ch2));
-        [~, maxIdx] = max(ch1);
-        measure = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',file.name, 'resistanceString', resistanceString, 'resistance', resistance, 'ch1point', ch1(maxIdx), 'ch2point', ch2(maxIdx));
+        m = max(ch1);
+        measure = struct('ch1',ch1, 'Times',times,'ch2',ch2,'fileName',file.name, 'resistanceString', resistanceString, 'resistance', resistance, 'ch1point', m, 'ch2point', mean(ch2(ch1==m)));
 end
 
 
